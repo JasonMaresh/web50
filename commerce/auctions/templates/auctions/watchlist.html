@@ -1,0 +1,37 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>My Watchlist</h2>
+    <div class="container">
+
+        <div class="row">
+
+          {% for watch in watchlist %}
+              {% if watch.item.active == True %}
+          <div class="col-md-4">
+            <div class="thumbnail">
+              <a href= " {% url 'details' watch.item.id %}" >
+                {% if not watch.item.image_url == "" %}
+                  <img src="{{watch.item.image_url}}" alt="{{watch.item.title}}" style="width:100%">
+                {% else %}
+                <img src="https://thumbs.dreamstime.com/b/no-image-available-icon-flat-vector-no-image-available-icon-flat-vector-illustration-132482953.jpg" alt="{{listing.title}}" style="width:100%">
+                {% endif %}
+                <div class="caption">
+                  <h4>{{watch.item.title}}</h4>
+                  <p>
+                    {% if not watch.item.price == 0 %}
+                      Price: ${{ watch.item.price }}
+                    {% else %}
+                      Starting Bid: ${{ watch.item.starting_bid }}
+                    {% endif %}
+                    <br>{{watch.item.description}}</p>
+                </div>
+              </a>
+            </div>
+           </div>
+              {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+{% endblock %}

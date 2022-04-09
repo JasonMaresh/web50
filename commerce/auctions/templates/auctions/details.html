@@ -1,0 +1,108 @@
+{% extends "auctions/layout.html" %}
+
+
+{% block body %}
+
+
+
+
+<h1 style="margin-bottom:30px"> Listing: {{listing.title}}</h1>
+<div style="margin:5px">
+{% if user.is_authenticated %}
+{% if user != listing.user %}
+    {% if not watchlist.active %}
+        <a href = "{% url 'watchlist' listing.id %}" class="btn btn-secondary btn-sm" role="button">Add to Watchlist</a>
+    {% else %}
+        <a href = "{% url 'watchlist' listing.id %}" class="btn btn-secondary btn-sm" role="button">Unwatch</a>
+    {% endif %}
+{% endif %}
+{% endif %}
+</div>
+<div>
+    {% if not listing.image_url == "" %}
+        <img src="{{listing.image_url}}" alt="{{listing.title}}" style="width:50%; max-width:250px; max-height:250px;">
+    {% else %}
+    <img src="https://thumbs.dreamstime.com/b/no-image-available-icon-flat-vector-no-image-available-icon-flat-vector-illustration-132482953.jpg" alt="{{listing.title}}" style="width:25%; max-width:250px; max-height:250px;">
+    {% endif %}
+</div>
+
+<div>
+    <p>{{listing.description}}</p>
+</div>
+
+<div>
+    {% if not listing.price == 0  %}
+        <h3>${{ listing.price|floatformat:2 }}</h3>
+    {% else %}
+        <h3> Starting Bid: ${{ listing.starting_bid }}
+    {% endif %}
+</div>
+<div style = "color:red">
+    {{ message }}
+</div>
+
+{% if user.is_authenticated %}
+
+<div>
+    {% if number_of_bids > 0 and listing.active == True %}
+        There are {{ number_of_bids }} bid(s) so far.  
+        {% if bidder == user %}
+            You are the highest bidder.
+        {% else %}
+            The current highest bidder is {{bidder}}.
+        {% endif %}
+    {% endif %}
+</div>
+
+{% if user != listing.user and listing.active == True %}
+    <form action="{% url 'bid' listing.id %}" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ bid_form }}
+        </div>
+        <input class="btn btn-primary" type="submit" value="Place Bid">
+    </form>
+{% elif listing.active == True %}
+    <a href = "{% url 'close_auction' listing.id %}" class="btn btn-secondary btn-sm" role="button">Close Auction</a>
+{% elif user == bidder %}
+    <h3> Congratulations!!! You are the winner of this bid!!! The {{ listing.title }} is now yours!!! </h3>
+{% else %}
+    <h3> Auction is closed! {{listing.title}} is sold to {{bidder}}. </h3>
+{% endif %}
+
+
+
+
+
+{% endif %}
+
+<div style="margin-top:30px">
+    <h5>Details:</h5>
+    listed by: {{listing.user}}<br>
+    posted on: {{listing.date_time}}<br>
+    {% if not listing.category == "" %}
+        Category: {{listing.category}}
+    {% else %}
+        Category: None
+    {% endif %}
+</div>
+
+<h3 style="margin-top:40px">Comments:</h3>
+{% if user.is_authenticated %}
+{% if user != listing.user and listing.active == True %}
+<form action = "{% url 'comment' listing.id %}" method="post" style="margin-bottom:20px">
+    {% csrf_token %}
+    <input type="submit" value="Submit"><br>
+    {{ comment_form }}
+</form>
+{% endif %}
+{% endif %}
+
+
+
+{% for comment in comments %}
+<p> <font size="-0"><strong>{{comment.user}}</strong></font>  &nbsp;&nbsp;<font size="-1">{{ comment.date_time }}</font> <br> <font size="+1">{{comment.comment}}</font> </p>
+{% endfor %}
+
+
+{% endblock %}
